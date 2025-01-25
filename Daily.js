@@ -3,7 +3,7 @@ const qs = require('qs');
 const fs = require("fs");
 const cfonts = require("cfonts");
 const chalk = require('chalk');
-
+const LOOP_INTERVAL = 24 * 60 * 60 * 1000
 // Utility function for logging
 function logMessage(currentNum, total, message, level = 'info') {
   const levels = {
@@ -102,6 +102,8 @@ cfonts.say('NT Exhaust', {
         maxLength: '0',
       });
     console.log(chalk.green("=== Telegram Channel : NT Exhaust ( @NTExhaust ) ==="))
+
+for(a = 0; a <10000;a++){    
   const file = fs.readFileSync('./data.txt', 'utf-8');
   const splitFile = file.split('\r\n');
   console.log(`[ Total ${splitFile.length} Stores ]\n`);
@@ -124,7 +126,7 @@ cfonts.say('NT Exhaust', {
     const checkinResult = await arichain.checkinDaily(address);
     const msg = checkinResult.msg
     if (checkinResult.status === 'success') {
-        console.log(chalk.green(`Check-in result: { "msg": "${msg}" }`));
+        console.log(chalk.green(`Check-in result: { "msg": "Successfully Check in" }`));
       } else {
         console.log(chalk.red(`Check-in result: { "msg": "${msg}" }`));
       }
@@ -145,4 +147,7 @@ cfonts.say('NT Exhaust', {
         console.log(chalk.red(`Transfer result: { "msg": "${msg2}" }`));
       }
   }
+  console.log(`Waiting for 24 Hours before the next transaction...`, "\x1b[33m");
+  await new Promise((resolve) => setTimeout(resolve, LOOP_INTERVAL));
+}
 })();
