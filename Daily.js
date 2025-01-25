@@ -147,8 +147,8 @@ for(a = 0; a <10000;a++){
         console.log(chalk.red(`Transfer result: { "msg": "${msg2}" }`));
       }
   }
- 
-}
-   console.log(`Waiting for 24 Hours before the next transaction...`, "\x1b[33m");
+    console.log(`Waiting for 24 Hours before the next transaction...`, "\x1b[33m");
   await new Promise((resolve) => setTimeout(resolve, LOOP_INTERVAL));
+}
+
 })();
