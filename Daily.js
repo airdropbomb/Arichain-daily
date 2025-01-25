@@ -110,7 +110,7 @@ for(a = 0; a <10000;a++){
 
   for (let i = 0; i < splitFile.length; i++) {
     const arichain = new AriChain(splitFile.length);
-    const line = splitFile[i].split(':');
+    const line = splitFile[i].split('|');
     const email = line[0];
     const password = line[1];
     const address = line[2];
