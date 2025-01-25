@@ -105,7 +105,7 @@ cfonts.say('NT Exhaust', {
 
 for(a = 0; a <10000;a++){    
   const file = fs.readFileSync('./data.txt', 'utf-8');
-  const splitFile = file.split('\r\n');
+  const splitFile = file.replace(/\r\n/g, '\n').split('\n');
   console.log(`[ Total ${splitFile.length} Stores ]\n`);
 
   for (let i = 0; i < splitFile.length; i++) {
