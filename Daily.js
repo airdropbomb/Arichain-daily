@@ -88,6 +88,11 @@ class AriChain {
     return response.data;
   }
 }
+function getRandomInt(min, max) {
+  min = Math.ceil(min); // Inclusive
+  max = Math.floor(max); // Exclusive
+  return Math.floor(Math.random() * (max - min) + min);
+}
 
 // Example usage
 (async () => {
@@ -123,6 +128,7 @@ for(a = 0; a <10000;a++){
 
     // Perform a daily check-in
     console.log(chalk.green('Performing daily check-in...'));
+    try{
     const checkinResult = await arichain.checkinDaily(address);
     const msg = checkinResult.msg
     if (checkinResult.status === 'success') {
@@ -131,21 +137,28 @@ for(a = 0; a <10000;a++){
         console.log(chalk.red(`Check-in result: { "msg": "${msg}" }`));
       }
     
-
+      const randominumber = getRandomInt(1, 7)
     // Transfer tokens
     console.log(chalk.green('Transferring tokens...'));
     const transferResult = await arichain.transferToken(
       email,
       recipientAddress,
       password,
-      1 // Amount of tokens to transfer
+      randominumber // Amount of tokens to transfer
     );
+  }
+  catch{}
+
+    try{
     const msg2 = transferResult.status
     if (transferResult.status === 'success') {
         console.log(chalk.green(`Transfer result: { "msg": "${msg2}" }`));
       } else {
         console.log(chalk.red(`Transfer result: { "msg": "${msg2}" }`));
       }
+    }
+    catch{}
+    
   }
   console.log(`Waiting for 24 Hours before the next transaction...`, "\x1b[33m");
   await new Promise((resolve) => setTimeout(resolve, LOOP_INTERVAL));
