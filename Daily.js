@@ -136,20 +136,19 @@ for(a = 0; a <10000;a++){
       } else {
         console.log(chalk.red(`Check-in result: { "msg": "${msg}" }`));
       }
-    
-      const randominumber = getRandomInt(1, 7)
-    // Transfer tokens
-    console.log(chalk.green('Transferring tokens...'));
-    const transferResult = await arichain.transferToken(
-      email,
-      recipientAddress,
-      password,
-      randominumber // Amount of tokens to transfer
-    );
   }
   catch{}
 
     try{
+      const randominumber = getRandomInt(1, 7)
+      // Transfer tokens
+      console.log(chalk.green('Transferring tokens...'));
+      const transferResult = await arichain.transferToken(
+        email,
+        recipientAddress,
+        password,
+        randominumber // Amount of tokens to transfer
+      );
     const msg2 = transferResult.status
     if (transferResult.status === 'success') {
         console.log(chalk.green(`Transfer result: { "msg": "${msg2}" }`));
