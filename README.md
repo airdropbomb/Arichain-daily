@@ -3,7 +3,7 @@ Tutorial On my channel telegram :https://t.me/airdropbombnode
 
 ## 1. Clone the repository to your local machine:
 ```sh
-https://github.com/airdropbomb/Arichain-daily.git
+git clone https://github.com/airdropbomb/Arichain-daily.git
 cd Arichain-daily
 ```
 ## 2. Install the required dependencies:
