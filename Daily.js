@@ -3,7 +3,8 @@ const qs = require('qs');
 const fs = require("fs");
 const cfonts = require("cfonts");
 const chalk = require('chalk');
-const LOOP_INTERVAL = 24 * 60 * 60 * 1000
+const LOOP_INTERVAL = 24 * 60 * 60 * 1000;
+
 // Utility function for logging
 function logMessage(currentNum, total, message, level = 'info') {
   const levels = {
@@ -33,6 +34,10 @@ class AriChain {
       return response;
     } catch (error) {
       console.error(`Request failed: ${error.message}`);
+      if (error.response) {
+        console.error(`Response data: ${JSON.stringify(error.response.data)}`);
+        console.error(`Response status: ${error.response.status}`);
+      }
       return null;
     }
   }
@@ -53,10 +58,10 @@ class AriChain {
       }
     );
     if (!response) {
-    //   logMessage('Failed check-in', 'error');
+      logMessage(this.currentNum, this.total, 'Failed check-in', 'error');
       return null;
     }
-    // logMessage('Check-in successful', 'info');
+    logMessage(this.currentNum, this.total, 'Check-in successful', 'info');
     return response.data;
   }
 
@@ -81,13 +86,14 @@ class AriChain {
       }
     );
     if (!response) {
-    //   logMessage('Failed to send token', 'error');
+      logMessage(this.currentNum, this.total, 'Failed to send token', 'error');
       return null;
     }
-    // logMessage('Token transfer successful', 'info');
+    logMessage(this.currentNum, this.total, 'Token transfer successful', 'info');
     return response.data;
   }
 }
+
 function getRandomInt(min, max) {
   min = Math.ceil(min); // Inclusive
   max = Math.floor(max); // Exclusive
@@ -96,70 +102,71 @@ function getRandomInt(min, max) {
 
 // Example usage
 (async () => {
-cfonts.say('NT Exhaust', {
-        font: 'block',        // Options: 'block', 'simple', '3d', etc.
-        align: 'center',
-        colors: ['cyan', 'magenta'],
-        background: 'black',
-        letterSpacing: 1,
-        lineHeight: 1,
-        space: true,
-        maxLength: '0',
-      });
-    console.log(chalk.green("=== Telegram Channel : NT Exhaust ( @NTExhaust ) ==="))
+  cfonts.say('NT Exhaust', {
+    font: 'block',        // Options: 'block', 'simple', '3d', etc.
+    align: 'center',
+    colors: ['cyan', 'magenta'],
+    background: 'black',
+    letterSpacing: 1,
+    lineHeight: 1,
+    space: true,
+    maxLength: '0',
+  });
+  console.log(chalk.green("=== Telegram Channel : NT Exhaust ( @NTExhaust ) ==="));
 
-for(a = 0; a <10000;a++){    
-  const file = fs.readFileSync('./data.txt', 'utf-8');
-  const splitFile = file.replace(/\r\n/g, '\n').split('\n');
-  console.log(`[ Total ${splitFile.length} Stores ]\n`);
+  for (let a = 0; a < 10000; a++) {
+    const file = fs.readFileSync('./data.txt', 'utf-8');
+    const splitFile = file.replace(/\r\n/g, '\n').split('\n');
+    console.log(`[ Total ${splitFile.length} Stores ]\n`);
 
-  for (let i = 0; i < splitFile.length; i++) {
-    const arichain = new AriChain(splitFile.length);
-    const line = splitFile[i].split(':');
-    const email = line[0];
-    const password = line[1];
-    const address = line[2];
-    const recipientAddress = line[3];
+    for (let i = 0; i < splitFile.length; i++) {
+      const arichain = new AriChain(splitFile.length);
+      const line = splitFile[i].split(':');
+      const email = line[0];
+      const password = line[1];
+      const address = line[2];
+      const recipientAddress = line[3];
 
-    console.log(chalk.green(`\nProcessing User ${i + 1} of ${splitFile.length}`));
-    console.log(chalk.yellow(`- Email: ${email}`));
-    console.log(chalk.yellow(`- Address: ${address}`));
-    console.log(chalk.yellow(`- Recipient Address: ${recipientAddress}\n`));
+      console.log(chalk.green(`\nProcessing User ${i + 1} of ${splitFile.length}`));
+      console.log(chalk.yellow(`- Email: ${email}`));
+      console.log(chalk.yellow(`- Address: ${address}`));
+      console.log(chalk.yellow(`- Recipient Address: ${recipientAddress}\n`));
 
-    // Perform a daily check-in
-    console.log(chalk.green('Performing daily check-in...'));
-    try{
-    const checkinResult = await arichain.checkinDaily(address);
-    const msg = checkinResult.msg
-    if (checkinResult.status === 'success') {
-        console.log(chalk.green(`Check-in result: { "msg": "Successfully Check in" }`));
-      } else {
-        console.log(chalk.red(`Check-in result: { "msg": "${msg}" }`));
+      // Perform a daily check-in
+      console.log(chalk.green('Performing daily check-in...'));
+      try {
+        const checkinResult = await arichain.checkinDaily(address);
+        const msg = checkinResult.msg;
+        if (checkinResult.status === 'success') {
+          console.log(chalk.green(`Check-in result: { "msg": "Successfully Check in" }`));
+        } else {
+          console.log(chalk.red(`Check-in result: { "msg": "${msg}" }`));
+        }
+      } catch (error) {
+        console.error(chalk.red(`Check-in failed: ${error.message}`));
       }
-  }
-  catch{}
 
-    try{
-      const randominumber = getRandomInt(1, 7)
-      // Transfer tokens
-      console.log(chalk.green('Transferring tokens...'));
-      const transferResult = await arichain.transferToken(
-        email,
-        recipientAddress,
-        password,
-        randominumber // Amount of tokens to transfer
-      );
-    const msg2 = transferResult.status
-    if (transferResult.status === 'success') {
-        console.log(chalk.green(`Transfer result: { "msg": "${msg2}" }`));
-      } else {
-        console.log(chalk.red(`Transfer result: { "msg": "${msg2}" }`));
+      try {
+        const randominumber = getRandomInt(1, 7);
+        // Transfer tokens
+        console.log(chalk.green('Transferring tokens...'));
+        const transferResult = await arichain.transferToken(
+          email,
+          recipientAddress,
+          password,
+          randominumber // Amount of tokens to transfer
+        );
+        const msg2 = transferResult.status;
+        if (transferResult.status === 'success') {
+          console.log(chalk.green(`Transfer result: { "msg": "${msg2}" }`));
+        } else {
+          console.log(chalk.red(`Transfer result: { "msg": "${msg2}" }`));
+        }
+      } catch (error) {
+        console.error(chalk.red(`Transfer failed: ${error.message}`));
       }
     }
-    catch{}
-    
+    console.log(`Waiting for 24 Hours before the next transaction...`, "\x1b[33m");
+    await new Promise((resolve) => setTimeout(resolve, LOOP_INTERVAL));
   }
-  console.log(`Waiting for 24 Hours before the next transaction...`, "\x1b[33m");
-  await new Promise((resolve) => setTimeout(resolve, LOOP_INTERVAL));
-}
 })();
