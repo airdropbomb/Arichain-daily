@@ -197,13 +197,13 @@ async function main() {
       ╚═╝  ╚═╝╚═════╝ ╚═════╝     ╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚══════╝
   `));
   
-  cfonts.say('NT Exhaust', {
+  cfonts.say('ADB NODE', {
     font: 'block',
     align: 'center',
     colors: ['cyan', 'magenta'],
     background: 'black',
   });
-  console.log(chalk.green('=== Telegram Channel : NT Exhaust ( @NTExhaust ) ==='));
+  console.log(chalk.green('=== Telegram Channel : NT Exhaust ( @airdropbombnode ) ==='));
 
   while (true) {
     console.log(chalk.cyan('\nSelect an option:'));
