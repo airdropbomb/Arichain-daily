@@ -7,7 +7,6 @@ const readline = require('readline');
 
 const LOOP_INTERVAL = 24 * 60 * 60 * 1000;
 const SETTINGS_FILE = 'settings.json';
-const ANSWER_FILE = 'answer.json';
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -45,30 +44,6 @@ function saveSettings(mode, manualAnswerIdx) {
   );
 }
 
-// Answer file management
-function getDailyAnswer() {
-  let answerData = { date: null, answer: null };
-  
-  // Check if answer.json exists and load it
-  if (fs.existsSync(ANSWER_FILE)) {
-    answerData = JSON.parse(fs.readFileSync(ANSWER_FILE, 'utf8'));
-  }
-
-  const today = new Date().toISOString().split('T')[0]; // Get current date (YYYY-MM-DD)
-
-  // If date doesn't match or file doesn't exist, generate new answer
-  if (!answerData.date || answerData.date !== today) {
-    answerData = {
-      date: today,
-      answer: getRandomInt(1, 5) // Random answer between 1-4
-    };
-    fs.writeFileSync(ANSWER_FILE, JSON.stringify(answerData, null, 2));
-    console.log(chalk.yellow(`Generated new daily answer: ${answerData.answer}`));
-  }
-
-  return answerData.answer;
-}
-
 // Main class for API interaction
 class AriChain {
   constructor(total) {
@@ -82,6 +57,9 @@ class AriChain {
       return response;
     } catch (error) {
       console.error(`Request failed: ${error.message}`);
+      if (error.response) {
+        console.error(`Status code: ${error.response.status}`);
+      }
       return null;
     }
   }
@@ -129,16 +107,16 @@ class AriChain {
     return response.data;
   }
 
-  async dailyAnswer(email, address) { // Removed isManualMode and manualAnswerIdx
+  async dailyAnswer(email, address, isManualMode, manualAnswerIdx) {
     const headers = {
       accept: '*/*',
       'content-type': 'application/x-www-form-urlencoded',
     };
-    const answer = getDailyAnswer(); // Get answer from file
+    const answer = isManualMode ? manualAnswerIdx : getRandomInt(1, 5);
     const data = qs.stringify({ email, address, answer });
     const response = await this.makeRequest(
       'POST',
-      'https://arichain.io/api/daily/answer',
+      'https://arichain.io/api/daily/answer', // Verify this endpoint
       { headers, data }
     );
     if (!response) {
@@ -153,7 +131,7 @@ class AriChain {
 // Main functions
 async function processAccounts(option) {
   const file = fs.readFileSync('./data.txt', 'utf-8');
-  const splitFile = file.replace(/\r\n/g, '\n').split('\n');
+  const splitFile = file.replace(/\r\n/g, '\n').split('\n').filter(Boolean); // Remove empty lines
   const total = splitFile.length;
   console.log(`[ Total ${total} Stores ]\n`);
 
@@ -178,7 +156,7 @@ async function processAccounts(option) {
 
   for (let i = 0; i < total; i++) {
     const arichain = new AriChain(total);
-    const line = splitFile[i].split(':');
+    const line = splitFile[i].split('|'); // Changed from ':' to '|' based on your data
     const [email, password, address, recipientAddress] = line;
 
     console.log(chalk.green(`\nProcessing User ${i + 1} of ${total}`));
@@ -191,7 +169,7 @@ async function processAccounts(option) {
       switch (option) {
         case '1': // Daily Answer
           console.log(chalk.green('Performing daily answer...'));
-          result = await arichain.dailyAnswer(email, address); // Updated call
+          result = await arichain.dailyAnswer(email, address, isManualMode, manualAnswerIdx);
           break;
         case '2': // Daily Check In
           console.log(chalk.green('Performing daily check-in...'));
@@ -222,14 +200,6 @@ async function main() {
       ╚═╝  ╚═╝╚═════╝ ╚═════╝     ╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚══════╝
   `));
   
-  cfonts.say('ADB NODE', {
-    font: 'block',
-    align: 'center',
-    colors: ['cyan', 'magenta'],
-    background: 'black',
-  });
-  console.log(chalk.green('=== Telegram Channel : NT Exhaust ( @airdropbombnode ) ==='));
-
   while (true) {
     console.log(chalk.cyan('\nSelect an option:'));
     console.log('1. Daily Answer');
