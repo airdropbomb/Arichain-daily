@@ -1,3 +1,5 @@
+## Daily Check In / Daily Answer / Transation
+
 # Arichain-daily
 Tutorial On my channel telegram :https://t.me/airdropbombnode
 
@@ -10,9 +12,9 @@ cd Arichain-daily
 ```sh
 npm install
 ```
-## Addational Install
+## Addational config (if you want to config to daily answer)
 ```sh
-npm install axios qs fs cfonts chalk
+nano settings.json
 ```
 ## 3. Fill Data 
 ```sh
