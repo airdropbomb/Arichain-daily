@@ -7,6 +7,7 @@ const readline = require('readline');
 
 const LOOP_INTERVAL = 24 * 60 * 60 * 1000;
 const SETTINGS_FILE = 'settings.json';
+const ANSWER_FILE = 'answer.json';
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -42,6 +43,30 @@ function saveSettings(mode, manualAnswerIdx) {
     SETTINGS_FILE,
     JSON.stringify({ mode, manualAnswerIdx }, null, 2)
   );
+}
+
+// Answer file management
+function getDailyAnswer() {
+  let answerData = { date: null, answer: null };
+  
+  // Check if answer.json exists and load it
+  if (fs.existsSync(ANSWER_FILE)) {
+    answerData = JSON.parse(fs.readFileSync(ANSWER_FILE, 'utf8'));
+  }
+
+  const today = new Date().toISOString().split('T')[0]; // Get current date (YYYY-MM-DD)
+
+  // If date doesn't match or file doesn't exist, generate new answer
+  if (!answerData.date || answerData.date !== today) {
+    answerData = {
+      date: today,
+      answer: getRandomInt(1, 5) // Random answer between 1-4
+    };
+    fs.writeFileSync(ANSWER_FILE, JSON.stringify(answerData, null, 2));
+    console.log(chalk.yellow(`Generated new daily answer: ${answerData.answer}`));
+  }
+
+  return answerData.answer;
 }
 
 // Main class for API interaction
@@ -104,12 +129,12 @@ class AriChain {
     return response.data;
   }
 
-  async dailyAnswer(email, address, isManualMode, manualAnswerIdx) {
+  async dailyAnswer(email, address) { // Removed isManualMode and manualAnswerIdx
     const headers = {
       accept: '*/*',
       'content-type': 'application/x-www-form-urlencoded',
     };
-    const answer = isManualMode ? manualAnswerIdx : getRandomInt(1, 5);
+    const answer = getDailyAnswer(); // Get answer from file
     const data = qs.stringify({ email, address, answer });
     const response = await this.makeRequest(
       'POST',
@@ -166,7 +191,7 @@ async function processAccounts(option) {
       switch (option) {
         case '1': // Daily Answer
           console.log(chalk.green('Performing daily answer...'));
-          result = await arichain.dailyAnswer(email, address, isManualMode, manualAnswerIdx);
+          result = await arichain.dailyAnswer(email, address); // Updated call
           break;
         case '2': // Daily Check In
           console.log(chalk.green('Performing daily check-in...'));
