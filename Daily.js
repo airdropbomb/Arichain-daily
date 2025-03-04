@@ -107,31 +107,92 @@ class AriChain {
     return response.data;
   }
 
-  async dailyAnswer(email, address, isManualMode, manualAnswerIdx) {
+  async getQuestion(address) {
     const headers = {
       accept: '*/*',
       'content-type': 'application/x-www-form-urlencoded',
+      host: 'arichain.io',
     };
-    const answer = isManualMode ? manualAnswerIdx : getRandomInt(1, 5);
-    const data = qs.stringify({ email, address, answer });
+    const data = qs.stringify({
+      address,
+      device: 'app',
+      blockchain: 'testnet',
+      is_mobile: 'Y',
+    });
     const response = await this.makeRequest(
       'POST',
-      'https://arichain.io/api/daily/answer', // Verify this endpoint
+      'https://arichain.io/api/event/quiz_q',
       { headers, data }
     );
-    if (!response) {
-      logMessage(this.currentNum, this.total, 'Failed daily answer', 'error');
+    if (!response || response.data.status === 'fail') {
+      logMessage(this.currentNum, this.total, response?.data.msg || 'Failed to get question', 'error');
       return null;
     }
-    logMessage(this.currentNum, this.total, 'Daily answer successful', 'info');
-    return response.data;
+    return response.data.result;
+  }
+
+  async answerQuestion(address, answerIdx, quizIdx) {
+    const headers = {
+      accept: '*/*',
+      'content-type': 'application/x-www-form-urlencoded',
+      Host: 'arichain.io',
+    };
+    const data = qs.stringify({
+      address,
+      quiz_idx: quizIdx,
+      answer_idx: answerIdx,
+      device: 'app',
+      blockchain: 'testnet',
+      is_mobile: 'Y',
+    });
+    const response = await this.makeRequest(
+      'POST',
+      'https://arichain.io/api/event/quiz_a',
+      { headers, data }
+    );
+    if (!response || response.data.status === 'fail') {
+      logMessage(this.currentNum, this.total, response?.data.msg || 'Failed to answer question', 'error');
+      return null;
+    }
+    if (response.data.result.code == 1) {
+      logMessage(this.currentNum, this.total, response.data.result.msg, 'error');
+      return null;
+    }
+    return response.data.result;
+  }
+
+  async dailyAnswer(email, address, isManualMode, manualAnswerIdx) {
+    console.log(chalk.green('Fetching quiz question...'));
+    const quizData = await this.getQuestion(address);
+    if (!quizData) return null;
+
+    const { quiz_idx, quiz_q } = quizData;
+    let answerIdx;
+
+    if (isManualMode) {
+      console.log(chalk.yellow('Available answers:'));
+      quiz_q.forEach((q, i) => console.log(`${i + 1}. ${q.question}`));
+      answerIdx = quiz_q[manualAnswerIdx - 1].q_idx;
+      logMessage(this.currentNum, this.total, `Using manual answer: ${quiz_q[manualAnswerIdx - 1].question}`, 'info');
+    } else {
+      const randomIndex = getRandomInt(0, quiz_q.length);
+      answerIdx = quiz_q[randomIndex].q_idx;
+      logMessage(this.currentNum, this.total, `Choosing random answer: ${quiz_q[randomIndex].question}`, 'info');
+    }
+
+    console.log(chalk.green('Submitting quiz answer...'));
+    const result = await this.answerQuestion(address, answerIdx, quiz_idx);
+    if (result) {
+      logMessage(this.currentNum, this.total, 'Quiz answered successfully', 'info');
+    }
+    return result;
   }
 }
 
 // Main functions
 async function processAccounts(option) {
   const file = fs.readFileSync('./data.txt', 'utf-8');
-  const splitFile = file.replace(/\r\n/g, '\n').split('\n').filter(Boolean); // Remove empty lines
+  const splitFile = file.replace(/\r\n/g, '\n').split('\n').filter(Boolean);
   const total = splitFile.length;
   console.log(`[ Total ${total} Stores ]\n`);
 
@@ -156,7 +217,7 @@ async function processAccounts(option) {
 
   for (let i = 0; i < total; i++) {
     const arichain = new AriChain(total);
-    const line = splitFile[i].split('|'); // Changed from ':' to '|' based on your data
+    const line = splitFile[i].split('|');
     const [email, password, address, recipientAddress] = line;
 
     console.log(chalk.green(`\nProcessing User ${i + 1} of ${total}`));
@@ -199,7 +260,7 @@ async function main() {
       ██║  ██║██████╔╝██████╔╝    ██║ ╚████║╚██████╔╝██████╔╝███████╗
       ╚═╝  ╚═╝╚═════╝ ╚═════╝     ╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚══════╝
   `));
-  
+
   while (true) {
     console.log(chalk.cyan('\nSelect an option:'));
     console.log('1. Daily Answer');
