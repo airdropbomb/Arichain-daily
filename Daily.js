@@ -111,7 +111,7 @@ class AriChain {
     const headers = {
       accept: '*/*',
       'content-type': 'application/x-www-form-urlencoded',
-      host: 'arichain.io',
+      host: 'mobile.arichain.io',
     };
     const data = qs.stringify({
       address,
