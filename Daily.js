@@ -96,7 +96,7 @@ class AriChain {
     });
     const response = await this.makeRequest(
       'POST',
-      'https://arichain.io/api/wallet/transfer_mobile',
+      'https://mobile.arichain.io/api/wallet/transfer_mobile',
       { headers, data }
     );
     if (!response) {
@@ -121,7 +121,7 @@ class AriChain {
     });
     const response = await this.makeRequest(
       'POST',
-      'https://arichain.io/api/event/quiz_q',
+      'https://mobile.arichain.io/api/event/quiz_q',
       { headers, data }
     );
     if (!response || response.data.status === 'fail') {
