@@ -147,7 +147,7 @@ class AriChain {
     });
     const response = await this.makeRequest(
       'POST',
-      'https://arichain.io/api/event/quiz_a',
+      'https://mobile.arichain.io/api/event/quiz_a',
       { headers, data }
     );
     if (!response || response.data.status === 'fail') {
