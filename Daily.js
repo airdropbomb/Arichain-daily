@@ -72,7 +72,7 @@ class AriChain {
     const data = qs.stringify({ address });
     const response = await this.makeRequest(
       'POST',
-      'https://arichain.io/api/event/checkin',
+      'https://mobile.arichain.io/api/event/checkin',
       { headers, data }
     );
     if (!response) {
